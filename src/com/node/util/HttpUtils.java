@@ -11,6 +11,28 @@ import java.net.URLConnection;
 public class HttpUtils {
 
     /**
+     * get the size of downloading file
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static long getHttpFileContentLength(String url) throws IOException{
+        int contentLength;
+        HttpURLConnection httpURLConnection = null;
+
+        try {
+           httpURLConnection = getHttpURLConnection(url);
+           contentLength = httpURLConnection.getContentLength();
+        } finally {
+            if(httpURLConnection != null){
+                httpURLConnection.disconnect();
+            }
+
+        }
+        return contentLength;
+    }
+
+    /**
      * blocked dividing download
      * @param url
      * @param startPos

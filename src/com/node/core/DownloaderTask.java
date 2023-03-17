@@ -32,7 +32,7 @@ public class DownloaderTask implements Callable<Boolean> {
     }
 
     @Override
-    public Boolean call() throws Exception{
+    public Boolean call() throws Exception {
 
         // get file name
         String httpFileName = HttpUtils.getHttpFileName(url);
@@ -46,26 +46,36 @@ public class DownloaderTask implements Callable<Boolean> {
         // get connection for parts downloading
         HttpURLConnection httpURLConnection = HttpUtils.getHttpURLConnection(url, startPos, endPos);
 
-        try(
+        try (
                 InputStream input = httpURLConnection.getInputStream();
                 BufferedInputStream bis = new BufferedInputStream(input);
                 RandomAccessFile accessFile = new RandomAccessFile(httpFileName, "rw");
-        ){
+        ) {
             byte[] buffer = new byte[Constant.BYTE_SIZE];
             int len = -1;
 
             // read the file data in a loop
-            while((len = bis.read(buffer)) != -1){
+            while ((len = bis.read(buffer)) != -1) {
+                // get sum of data per second, using Atomic class
+                // this is for displaying download info and get the speed.
+                DownloadInfoThread.downSize.add(len);
+
+                // write the buffer
                 accessFile.write(buffer, 0, len);
             }
 
 
-        }catch(FileNotFoundException) {
+        } catch (FileNotFoundException e) {
             LogUtils.error("File not exists!");
-        }catch(Exception e){
+            return false;
+        } catch (Exception e) {
             LogUtils.error("Errors, please contact admin");
+            return false;
+        } finally {
+            httpURLConnection.disconnect();
         }
 
-        return null;
+        return true;
 
+    }
 }

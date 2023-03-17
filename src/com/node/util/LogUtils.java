@@ -16,11 +16,11 @@ public class LogUtils {
     // Object is undefined parameters.
     private static void print(String msg, String level, Object... args){
         if(args != null && args.length > 0){
-            String.format(msg.replace("{}", "%s"), args);
+            msg = String.format(msg.replace("{}", "%s"), args);
         }
 
         String name = Thread.currentThread().getName();
-        System.out.println(LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm::ss")) + " "
+        System.out.println(LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm:ss")) + " "
                 + name + level + msg);
 
     }
