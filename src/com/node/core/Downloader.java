@@ -18,6 +18,9 @@ public class Downloader {
     public ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     public ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(Constant.THREAD_NUM,
             Constant.THREAD_NUM, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<>(Constant.THREAD_NUM));
+
+    private CountDownLatch countDownLatch = new CountDownLatch(Constant.THREAD_NUM);
+
     public void download(String url){
         //get the file name
         String httpFileName = HttpUtils.getHttpFileName(url);
@@ -50,19 +53,15 @@ public class Downloader {
             ArrayList<Future> list = new ArrayList<>();
             split(url, list);
 
-            list.forEach(future ->{
-                try {
-                    future.get();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            // if a thread gets here and other threads are still running
+            // the other threads are expected to end.
+            countDownLatch.await();
 
 
         } catch (IOException e){
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
         try(
@@ -136,7 +135,7 @@ public class Downloader {
                 }
 
                 // get download task
-                DownloaderTask downloaderTask = new DownloaderTask(url, startPos, endPos, i);
+                DownloaderTask downloaderTask = new DownloaderTask(url, startPos, endPos, i, countDownLatch);
 
                 // feed the task to thread pool
                 Future<Boolean> future = poolExecutor.submit(downloaderTask);

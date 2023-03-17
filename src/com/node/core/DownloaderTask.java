@@ -7,6 +7,8 @@ import com.node.util.LogUtils;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+
 /*
     parts downloading task
  */
@@ -24,11 +26,14 @@ public class DownloaderTask implements Callable<Boolean> {
     // to display current downloading part
     private final int part;
 
-    public DownloaderTask(String url, long startPos, long endPos, int part) {
+    private CountDownLatch countDownLatch;
+
+    public DownloaderTask(String url, long startPos, long endPos, int part, CountDownLatch countDownLatch) {
         this.url = url;
         this.startPos = startPos;
         this.endPos = endPos;
         this.part = part;
+        this.countDownLatch = countDownLatch;
     }
 
     @Override
@@ -73,6 +78,8 @@ public class DownloaderTask implements Callable<Boolean> {
             return false;
         } finally {
             httpURLConnection.disconnect();
+
+            countDownLatch.countDown();
         }
 
         return true;
