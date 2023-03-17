@@ -11,6 +11,27 @@ import java.net.URLConnection;
 public class HttpUtils {
 
     /**
+     * blocked dividing download
+     * @param url
+     * @param startPos
+     * @param endPos
+     * @return
+     */
+    public static HttpURLConnection getHttpURLConnection(String url, long startPos, long endPos) throws IOException {
+        HttpURLConnection httpURLConnection = getHttpURLConnection(url);
+        LogUtils.info("Downloading range: {}-{}", startPos, endPos);
+
+        if(endPos != 0){
+            // bytes = 100 - 200
+            httpURLConnection.setRequestProperty("RANGE", "bytes=" + startPos + "-" + endPos);
+        }else{
+            httpURLConnection.setRequestProperty("RANGE", "bytes=" + startPos + "-");
+        }
+
+        return httpURLConnection;
+    }
+
+    /**
      * Get the object for HttpURLConnection
      * @param url file's url
      * @return

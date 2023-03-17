@@ -2,8 +2,6 @@ package com.node.core;
 
 import com.node.constant.Constant;
 
-import java.util.ConcurrentModificationException;
-
 /**
  * show downloading information
  */
